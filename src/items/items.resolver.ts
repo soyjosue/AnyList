@@ -10,17 +10,9 @@ import { User } from 'src/users/entities/user.entity';
 export class ItemsResolver {
   constructor(private readonly itemsService: ItemsService) {}
 
-  @Mutation(() => Item, { name: 'createItem' })
-  async createItem(
-    @Args('createItemInput') createItemInput: CreateItemInput,
-    @CurrentUser() currentUser: User,
-  ): Promise<Item> {
-    return await this.itemsService.create(createItemInput, currentUser);
-  }
-
   @Query(() => [Item], { name: 'items' })
-  async findAll(): Promise<Item[]> {
-    return this.itemsService.findAll();
+  async findAll(@CurrentUser() currentUser: User): Promise<Item[]> {
+    return this.itemsService.findAll(currentUser);
   }
 
   @Query(() => Item, { name: 'item' })
@@ -28,6 +20,14 @@ export class ItemsResolver {
     @Args('id', { type: () => String }, ParseUUIDPipe) id: string,
   ): Promise<Item> {
     return this.itemsService.findOne(id);
+  }
+
+  @Mutation(() => Item, { name: 'createItem' })
+  async createItem(
+    @Args('createItemInput') createItemInput: CreateItemInput,
+    @CurrentUser() currentUser: User,
+  ): Promise<Item> {
+    return await this.itemsService.create(createItemInput, currentUser);
   }
 
   @Mutation(() => Item, { name: 'updateItem' })
