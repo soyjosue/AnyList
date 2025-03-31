@@ -19,6 +19,4 @@ export class Item {
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   quantityUnits?: string; // g, ml, kg, tsp
-  // stores
-  // user
 }
