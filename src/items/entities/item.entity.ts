@@ -4,10 +4,12 @@ import {
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { User } from './../../users/entities/user.entity';
+import { ListItem } from 'src/list-item/entities/list-item.entity';
 
 @Entity({ name: 'items' })
 @ObjectType()
@@ -24,8 +26,12 @@ export class Item {
   @Field(() => String, { nullable: true })
   quantityUnits?: string;
 
-  @ManyToOne(() => User, (user) => user.items, { nullable: false })
-  @Index('item-userId-index')
+  @ManyToOne(() => User, (user) => user.items, { nullable: false, lazy: true })
+  @Index('userId-item-index')
   @Field(() => User)
   user: User;
+
+  @OneToMany(() => ListItem, (listItem) => listItem.list, { lazy: true })
+  @Field(() => [ListItem])
+  listItem: ListItem[];
 }

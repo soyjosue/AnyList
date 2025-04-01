@@ -21,12 +21,15 @@ import { UpdateUserInput } from './dto/inputs/UpdateUserInput.dto';
 import { ItemsService } from 'src/items/items.service';
 import { PaginationArgs, SeachArgs } from 'src/common/dto/args';
 import { Item } from 'src/items/entities/item.entity';
+import { List } from 'src/lists/entities/list.entity';
+import { ListsService } from 'src/lists/lists.service';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(
     private readonly _usersService: UsersService,
     private readonly _itemsService: ItemsService,
+    private readonly _listService: ListsService,
   ) {}
 
   @Query(() => [User], { name: 'users' })
@@ -83,5 +86,21 @@ export class UsersResolver {
     @Args() seachArgs: SeachArgs,
   ): Promise<Item[]> {
     return this._itemsService.findAll(user, paginationArgs, seachArgs);
+  }
+
+  @Roles(RoleEnum.admin)
+  @ResolveField(() => [List], { name: 'listCount' })
+  async listCount(@Parent() user: User): Promise<number> {
+    return this._listService.countByUser(user);
+  }
+
+  @Roles(RoleEnum.admin)
+  @ResolveField(() => [List], { name: 'lists' })
+  async getListByUser(
+    @Parent() user: User,
+    @Args() paginationArgs: PaginationArgs,
+    @Args() seachArgs: SeachArgs,
+  ): Promise<List[]> {
+    return this._listService.findAll(user, paginationArgs, seachArgs);
   }
 }
