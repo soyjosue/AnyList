@@ -15,6 +15,7 @@ import { User } from './entities/user.entity';
 import { SignupInput } from './../auth/dto/inputs/signup.input';
 import { RoleEnum } from './../auth/enums/valid-roles.enum';
 import { UpdateUserInput } from './dto/inputs/UpdateUserInput.dto';
+import { PaginationArgs, SeachArgs } from 'src/common/dto/args';
 
 @Injectable()
 export class UsersService {
@@ -24,14 +25,27 @@ export class UsersService {
     @InjectRepository(User) private readonly _userRepository: Repository<User>,
   ) {}
 
-  async findAll(roles: RoleEnum[]): Promise<User[]> {
+  async findAll(
+    roles: RoleEnum[],
+    { limit, offset }: PaginationArgs,
+    { seach }: SeachArgs,
+  ): Promise<User[]> {
     if (roles.length === 0) return await this._userRepository.find();
 
-    return this._userRepository
+    const queryBuilder = this._userRepository
       .createQueryBuilder()
+      .take(limit)
+      .skip(offset)
       .andWhere('ARRAY[roles] && ARRAY[:...roles]')
-      .setParameter('roles', roles)
-      .getMany();
+      .setParameter('roles', roles);
+
+    if (seach) {
+      queryBuilder.andWhere('LOWER("fullName") like :fullName', {
+        fullName: `%${seach.toLocaleLowerCase()}%`,
+      });
+    }
+
+    return queryBuilder.getMany();
   }
 
   async findOneByEmail(email: string): Promise<User> {

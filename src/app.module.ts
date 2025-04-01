@@ -15,6 +15,9 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { JwtPayload } from './auth/interfaces/jwt-payload.interface';
+import { SeedModule } from './seed/seed.module';
+import { CommonModule } from './common/common.module';
+import { ListsModule } from './lists/lists.module';
 
 @Module({
   imports: [
@@ -69,6 +72,12 @@ import { JwtPayload } from './auth/interfaces/jwt-payload.interface';
     UsersModule,
 
     AuthModule,
+
+    SeedModule,
+
+    CommonModule,
+
+    ListsModule,
   ],
   providers: [
     {

@@ -1,25 +1,32 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { ItemsService } from './items.service';
 import { Item } from './entities/item.entity';
-import { CreateItemInput, UpdateItemInput } from './dto/inputs';
 import { ParseUUIDPipe } from '@nestjs/common';
+
+import { ItemsService } from './items.service';
+import { CreateItemInput, UpdateItemInput } from './dto/inputs';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { PaginationArgs, SeachArgs } from 'src/common/dto/args';
 
 @Resolver(() => Item)
 export class ItemsResolver {
   constructor(private readonly itemsService: ItemsService) {}
 
   @Query(() => [Item], { name: 'items' })
-  async findAll(@CurrentUser() currentUser: User): Promise<Item[]> {
-    return this.itemsService.findAll(currentUser);
+  async findAll(
+    @Args() paginationArgs: PaginationArgs,
+    @Args() seachArgs: SeachArgs,
+    @CurrentUser() currentUser: User,
+  ): Promise<Item[]> {
+    return this.itemsService.findAll(currentUser, paginationArgs, seachArgs);
   }
 
   @Query(() => Item, { name: 'item' })
   findOne(
     @Args('id', { type: () => String }, ParseUUIDPipe) id: string,
+    @CurrentUser() currentUser: User,
   ): Promise<Item> {
-    return this.itemsService.findOne(id);
+    return this.itemsService.findOne(id, currentUser);
   }
 
   @Mutation(() => Item, { name: 'createItem' })
@@ -33,14 +40,20 @@ export class ItemsResolver {
   @Mutation(() => Item, { name: 'updateItem' })
   updateItem(
     @Args('updateItemInput') updateItemInput: UpdateItemInput,
+    @CurrentUser() currentUser: User,
   ): Promise<Item> {
-    return this.itemsService.update(updateItemInput.id, updateItemInput);
+    return this.itemsService.update(
+      updateItemInput.id,
+      updateItemInput,
+      currentUser,
+    );
   }
 
   @Mutation(() => Item, { name: 'removeItem' })
   removeItem(
     @Args('id', { type: () => String }, ParseUUIDPipe) id: string,
+    @CurrentUser() currentUser: User,
   ): Promise<Item> {
-    return this.itemsService.remove(id);
+    return this.itemsService.remove(id, currentUser);
   }
 }
